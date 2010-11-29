@@ -112,8 +112,10 @@
 				";
 				$where .= "
 					AND (
-						'{$value}' >= t{$field_id}_{$this->_key}.value_from
-						AND '{$value}' <= t{$field_id}_{$this->_key}.value_to
+						('{$value}' = t{$field_id}_{$this->_key}.value)
+						OR
+						('{$value}' >= t{$field_id}_{$this->_key}.value_from
+						AND '{$value}' <= t{$field_id}_{$this->_key}.value_to)
 					)
 				";
 			}
