@@ -70,6 +70,10 @@
 								'{$value_from}' >= t{$field_id}_{$this->_key}.value_from
 								AND '{$value_to}' <= t{$field_id}_{$this->_key}.value_to
 							)
+							OR (
+								t{$field_id}_{$this->_key}.value_from >= '{$value_from}'
+								AND t{$field_id}_{$this->_key}.value_to <= '{$value_to}'
+							)
 						)
 					)
 				";
