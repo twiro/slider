@@ -1,0 +1,3 @@
+div.field-slider var { display: none; }
+div.field-slider input { background: transparent; border: none; text-align: right; }
+div.field-slider div.slider { width: 90%; /* background: #eee; height: 3px; */ margin-top: -17px; }
