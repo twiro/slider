@@ -6,7 +6,8 @@
 			$this->_name = __('Slider');
 		}
 		
-
+		
+		
 		// Also store 'from' and 'to', for filtering purposes:
 		public function processRawFieldData($data, &$status, $simulate = false, $entry_id = null) {
 			$status = self::__OK__;
@@ -216,6 +217,20 @@
 		}
 		
 		
+		// For the XML output:
+		public function appendFormattedElement(&$wrapper, $data, $encode=false){
+			$value = $data['value'];
+			if($this->get('range') == 1)
+			{
+				$element = new XMLElement($this->get('element_name'), null, array('range'=>'yes', 'from'=>$data['value_from'], 'to'=>$data['value_to']));
+			} else {
+				$element = new XMLElement($this->get('element_name'), $data['value'], array('range'=>'no'));
+			}
+			$wrapper->appendChild($element);
+		}
+		
+		
+		// Create table function:
 		public function createTable(){
 			return Symphony::Database()->query(
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
