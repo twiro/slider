@@ -40,15 +40,15 @@
 			
 			$field_id = $this->get('id');
 			
-			if(preg_match('/^(\n*)(\sto\s|-)(\n*)/', $data[0])){
+			if(preg_match('/^(\d*)(\sto\s|-)(\d*)/', $data[0])){
 				// Will test whether the 'to' range operator or n-n format has been used in the datasource filter or parameter
-				if(preg_match('/^(\n*)\sto\s(\n*)/', $data[0])){
+				if(preg_match('/^(\d*)\sto\s(\d*)/', $data[0])){
 					$data = trim(explode('to', $data[0])); // Array from numeric values
 					$value = implode('-',$data); // $value created to match database
 					$value_from = $data[0]; // From first digit
 					$value_to = $data[1]; // From second digit
 				}
-				elseif(preg_match('/^(\n*)-(\n*)/', $data[0])){
+				elseif(preg_match('/^(\d*)-(\d*)/', $data[0])){
 					$value = $data[0]; // Value to match database
 					$data = trim(explode('-', $data[0])); // Array from numeric values
 					$value_from = $data[0]; // From first digit
