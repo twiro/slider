@@ -6,8 +6,8 @@ Class extension_Slider extends Extension
 	{
 		return array(
 			'name' => 'Field: Slider',
-			'version' => '0.1',
-			'release-date' => '2010-11-30',
+			'version' => '0.2',
+			'release-date' => '2011-12-16',
 			'author' => array(
 				'name' => 'Giel Berkers',
 				'website' => 'http://www.gielberkers.com',

@@ -1,8 +1,8 @@
 <?php
 
 	Class fieldSlider extends Field {
-		public function __construct(&$parent){
-			parent::__construct($parent);
+		public function __construct(){
+			parent::__construct();
 			$this->_name = __('Slider');
 		}
 		
@@ -38,89 +38,96 @@
 		}
 		
 		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation = false) {
-			
+
 			$field_id = $this->get('id');
-			
-			if(preg_match('/^(\d*)(\sto\s|-)(\d*)/', $data[0])){
-				// Will test whether the 'to' range operator or n-n format has been used in the datasource filter or parameter
-				if(preg_match('/^(\d*)\sto\s(\d*)/', $data[0])){
-					$data = trim(explode('to', $data[0])); // Array from numeric values
-					$value = implode('-',$data); // $value created to match database
-					$value_from = $data[0]; // From first digit
-					$value_to = $data[1]; // From second digit
-				}
-				elseif(preg_match('/^(\d*)-(\d*)/', $data[0])){
-					$value = $data[0]; // Value to match database
-					$data = trim(explode('-', $data[0])); // Array from numeric values
-					$value_from = $data[0]; // From first digit
-					$value_to = $data[1]; // From second digit
-				}
-				
-				$this->_key++;
-				
-				$joins .= "
-					LEFT JOIN
-						`tbl_entries_data_{$field_id}` AS t{$field_id}_{$this->_key}
-						ON (e.id = t{$field_id}_{$this->_key}.entry_id)
-				";
-				// Check whether user range is equal to or within defined range
-				$where .= "
-					AND (
-						('{$value}' = t{$field_id}_{$this->_key}.value)
-							OR (
-								'{$value_from}' >= t{$field_id}_{$this->_key}.value_from
-								AND '{$value_to}' <= t{$field_id}_{$this->_key}.value_to
-							)
-							OR (
-								t{$field_id}_{$this->_key}.value_from >= '{$value_from}'
-								AND t{$field_id}_{$this->_key}.value_to <= '{$value_to}'
-							)
-						)
-					)
-				";
-			}
-			elseif ($andOperation) {
-				foreach ($data as $value) {
-					$this->_key++;
-					$value = $this->cleanValue($value);
-					$joins .= "
-						LEFT JOIN
-							`tbl_entries_data_{$field_id}` AS t{$field_id}_{$this->_key}
-							ON (e.id = t{$field_id}_{$this->_key}.entry_id)
-					";
-					$where .= "
-						AND (
-							'{$value}' >= t{$field_id}_{$this->_key}.value_from
-							AND '{$value}' <= t{$field_id}_{$this->_key}.value_to
-						)
-					";
-				}
-			}
-			else{
-				// Single parameter value, or single value in DS filter box
-				if (!is_array($data)) $data = array($data);
-				
-				foreach ($data as &$value) {
-					$value = $this->cleanValue($value);
-				}
-							
-				$this->_key++;
-	
-				$joins .= "
-					LEFT JOIN
-						`tbl_entries_data_{$field_id}` AS t{$field_id}_{$this->_key}
-						ON (e.id = t{$field_id}_{$this->_key}.entry_id)
-				";
-				$where .= "
-					AND (
-						('{$value}' = t{$field_id}_{$this->_key}.value)
-						OR
-						('{$value}' >= t{$field_id}_{$this->_key}.value_from
-						AND '{$value}' <= t{$field_id}_{$this->_key}.value_to)
-					)
-				";
-			}
-			
+            if (!is_array($data)) $data = array($data);
+
+            $i = 0;
+
+            foreach($data as $filterValue)
+            {
+                $this->_key++;
+
+                $joins .= "
+                    LEFT JOIN
+                        `tbl_entries_data_{$field_id}` AS t{$field_id}_{$this->_key}
+                        ON (e.id = t{$field_id}_{$this->_key}.entry_id)
+                ";
+
+                $andOr = $andOperation ? ' AND ' : ' OR ';
+                if($i == 0) { $andOr = 'AND'; }
+                $i++;
+
+                $filterValue = $this->cleanValue($filterValue);
+                if(preg_match('/^(\d*)(\sto\s|-)(\d*)/', $filterValue)){
+                    // Will test whether the 'to' range operator or n-n format has been used in the datasource filter or parameter
+                        if(preg_match('/^(\d*)\sto\s(\d*)/', $filterValue)){
+                            $data = trim(explode('to', $filterValue)); // Array from numeric values
+                            $value = implode('-',$data); // $value created to match database
+                            $value_from = $data[0]; // From first digit
+                            $value_to = $data[1]; // From second digit
+                        }
+                        elseif(preg_match('/^(\d*)-(\d*)/', $filterValue)){
+                            $value = $filterValue; // Value to match database
+                            $data = trim(explode('-', $filterValue)); // Array from numeric values
+                            $value_from = $data[0]; // From first digit
+                            $value_to = $data[1]; // From second digit
+                        }
+
+                        // Check whether user range is equal to or within defined range
+                        $where .= "
+                            {$andOr} (
+                                ('{$value}' = t{$field_id}_{$this->_key}.value)
+                                    OR (
+                                        '{$value_from}' >= t{$field_id}_{$this->_key}.value_from
+                                        AND '{$value_to}' <= t{$field_id}_{$this->_key}.value_to
+                                    )
+                                    OR (
+                                        t{$field_id}_{$this->_key}.value_from >= '{$value_from}'
+                                        AND t{$field_id}_{$this->_key}.value_to <= '{$value_to}'
+                                    )
+                                )
+                            )
+                        ";
+
+                } elseif(preg_match('/^(greater\sthan|smaller\sthan)(\d*)/', $filterValue)) {
+                    // Match the smaller than / greater than -patteren:
+                    $smaller_than = false;
+                    $greater_than = false;
+                    if(preg_match('/^greater\sthan\s(\d*)/', $filterValue)){
+                        $data = explode('greater than', $filterValue); // Array from numeric values
+                        $greater_than = trim($data[1]); // From first digit
+                    } elseif(preg_match('/^smaller\sthan\s(\d*)/', $filterValue)){
+                        $data = explode('smaller than', $filterValue); // Array from numeric values
+                        $smaller_than = trim($data[1]); // From second digit
+                    }
+
+                    if($greater_than != false)
+                    {
+                        $where .= " {$andOr} (
+                            t{$field_id}_{$this->_key}.value > '{$greater_than}' OR
+                            t{$field_id}_{$this->_key}.value_from > '{$greater_than}')";
+                    }
+                    if($smaller_than != false)
+                    {
+                        $where .= " {$andOr} (
+                            t{$field_id}_{$this->_key}.value < '{$smaller_than}' OR
+                            t{$field_id}_{$this->_key}.value_to < '{$smaller_than}')";
+                    }
+
+                } else {
+                    // Single parameter value, or single value in DS filter box
+                    $where .= "
+                        {$andOr} (
+                            (t{$field_id}_{$this->_key}.value = '{$filterValue}')
+                            OR
+                            (t{$field_id}_{$this->_key}.value_from <= '{$filterValue}'
+                            AND t{$field_id}_{$this->_key}.value_to >= '{$filterValue}')
+                        )
+                    ";
+                }
+            }
+
 			return true;
 		}
 
@@ -128,18 +135,20 @@
 		// Publish panel (on publish page):
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
 			// Add stylesheet to head:
-			if ($this->_engine->Page) {
-				$this->_engine->Page->addStylesheetToHead(URL . '/extensions/slider/assets/smoothness/jquery-ui-1.8.6.custom.css', 'screen', 75);
-				$this->_engine->Page->addStylesheetToHead(URL . '/extensions/slider/assets/slider.css', 'screen', 76);
-				$this->_engine->Page->addScriptToHead(URL . '/extensions/slider/assets/jquery-ui-1.8.6.custom.min.js', 77);
-				$this->_engine->Page->addScriptToHead(URL . '/extensions/slider/assets/slider.js', 78);
+            $page = Administration::instance()->Page;
+			if ($page) {
+                $page->addStylesheetToHead(URL . '/extensions/slider/assets/smoothness/jquery-ui-1.8.6.custom.css', 'screen');
+                $page->addStylesheetToHead(URL . '/extensions/slider/assets/slider.css', 'screen');
+                $page->addScriptToHead(URL . '/extensions/slider/assets/jquery-ui-1.8.6.custom.min.js');
+                $page->addScriptToHead(URL . '/extensions/slider/assets/slider.js');
 			}
 			$value = General::sanitize($data['value']);
 			if(empty($value))
 			{
 				$value = $this->get('start_value');
 			}
-			$label = Widget::Label($this->get('label'));
+
+			$label = Widget::Label($this->label());
 			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
 			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array('readonly'=>'readonly')));
 			$label->appendChild(new XMLElement('div', '', array('class'=>'slider')));
@@ -181,7 +190,9 @@
 		public function displaySettingsPanel(&$wrapper, $errors = null)
 		{
 			parent::displaySettingsPanel($wrapper, $errors);
-			
+
+            $wrapper->appendChild($this->buildPublishLabel());
+
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
 			$label = Widget::Label(__('Minimum value'));
 			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][min_value]', $this->get('min_range')));

@@ -1,7 +1,7 @@
 # Symphony Slider Field #
 
-Version: 0.1  
-Release date: 30-11-2010  
+Version: 0.2
+Release date: 16-12-2011
 Author: Giel Berkers  
 Website:  [www.gielberkers.com](http://www.gielberkers.com)  
 E-mail: <info@gielberkers.com>
@@ -22,7 +22,12 @@ This field adds a slider with the following functionality:
 
 ### Filtering ###
 
-Users can filter using the 'to' range operator as defined in the Symphony docs. They could use '{$param-1} to {$param-2}', users can filter using '1-10' or similar, using the '-' between numbers. Also, users can just enter one number either via a parameter, or directly. Fallback paramaters work as default '{$param:10}' for example.
+Users can filter using the 'to' range operator as defined in the Symphony docs. They could use '{$param-1} to {$param-2}',
+users can filter using '1-10' or similar, using the '-' between numbers. Another way of filtering is by using 'greater than' or
+'smaller than' statements. For example: 'greater than 40'. Combining is als possible: 'greater than 40 + smaller than 60'.
+
+Also, users can just enter one number either
+via a parameter, or directly. Fallback paramaters work as default '{$param:10}' for example.
 
 Results are returned in the following ways:
 
