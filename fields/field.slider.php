@@ -191,7 +191,7 @@
 		{
 			parent::displaySettingsPanel($wrapper, $errors);
 
-            $wrapper->appendChild($this->buildPublishLabel());
+            // $wrapper->appendChild($this->buildPublishLabel());
 
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
 			$label = Widget::Label(__('Minimum value'));
