@@ -1,10 +1,7 @@
 # Symphony Slider Field #
 
-Version: 0.2
-Release date: 16-12-2011
-Author: Giel Berkers  
-Website:  [www.gielberkers.com](http://www.gielberkers.com)  
-E-mail: <info@gielberkers.com>
+Author: Twisted Interactive  
+Website: http://www.twisted.nl
 
 ### Contributors ###
 
