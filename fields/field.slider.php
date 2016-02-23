@@ -1,172 +1,32 @@
 <?php
 
 	Class fieldSlider extends Field {
-		public function __construct(){
+      
+		/**
+		 *
+		 * Constructor for the Field object
+		 */
+		 
+		public function __construct() {
+			// call the parent constructor
 			parent::__construct();
+			// set the name of the field
 			$this->_name = __('Slider');
 		}
 		
 		
-		
-		// Also store 'from' and 'to', for filtering purposes:
-		public function processRawFieldData($data, &$status, $simulate = false, $entry_id = null) {
-			$status = self::__OK__;
-			
-			if (strlen(trim($data)) == 0) return array();
-			
-			$values = explode('-', $data);
-			
-			$result = array(
-				'value' => $data
-			);
-			
-			if(count($values) == 2)
-			{
-				$result['value_from'] = $values[0];
-				$result['value_to'] = $values[1];
-			}
-			
-			return $result;
-		}
-		
-
-		// Filter functions:
-		
-		public function canFilter()
-		{
+		public function canFilter(){
 			return true;
 		}
 		
-		public function buildDSRetrivalSQL($data, &$joins, &$where, $andOperation = false) {
-
-			$field_id = $this->get('id');
-            if (!is_array($data)) $data = array($data);
-
-            $i = 0;
-
-            foreach($data as $filterValue)
-            {
-                $this->_key++;
-
-                $joins .= "
-                    LEFT JOIN
-                        `tbl_entries_data_{$field_id}` AS t{$field_id}_{$this->_key}
-                        ON (e.id = t{$field_id}_{$this->_key}.entry_id)
-                ";
-
-                $andOr = $andOperation ? ' AND ' : ' OR ';
-                if($i == 0) { $andOr = 'AND'; }
-                $i++;
-
-                $filterValue = $this->cleanValue($filterValue);
-                if(preg_match('/^(\d*)(\sto\s|-)(\d*)/', $filterValue)){
-                    // Will test whether the 'to' range operator or n-n format has been used in the datasource filter or parameter
-                        if(preg_match('/^(\d*)\sto\s(\d*)/', $filterValue)){
-                            $data = trim(explode('to', $filterValue)); // Array from numeric values
-                            $value = implode('-',$data); // $value created to match database
-                            $value_from = $data[0]; // From first digit
-                            $value_to = $data[1]; // From second digit
-                        }
-                        elseif(preg_match('/^(\d*)-(\d*)/', $filterValue)){
-                            $value = $filterValue; // Value to match database
-                            $data = trim(explode('-', $filterValue)); // Array from numeric values
-                            $value_from = $data[0]; // From first digit
-                            $value_to = $data[1]; // From second digit
-                        }
-
-                        // Check whether user range is equal to or within defined range
-                        $where .= "
-                            {$andOr} (
-                                ('{$value}' = t{$field_id}_{$this->_key}.value)
-                                    OR (
-                                        '{$value_from}' >= t{$field_id}_{$this->_key}.value_from
-                                        AND '{$value_to}' <= t{$field_id}_{$this->_key}.value_to
-                                    )
-                                    OR (
-                                        t{$field_id}_{$this->_key}.value_from >= '{$value_from}'
-                                        AND t{$field_id}_{$this->_key}.value_to <= '{$value_to}'
-                                    )
-                                )
-                            )
-                        ";
-
-                } elseif(preg_match('/^(greater\sthan|smaller\sthan)(\d*)/', $filterValue)) {
-                    // Match the smaller than / greater than -patteren:
-                    $smaller_than = false;
-                    $greater_than = false;
-                    if(preg_match('/^greater\sthan\s(\d*)/', $filterValue)){
-                        $data = explode('greater than', $filterValue); // Array from numeric values
-                        $greater_than = trim($data[1]); // From first digit
-                    } elseif(preg_match('/^smaller\sthan\s(\d*)/', $filterValue)){
-                        $data = explode('smaller than', $filterValue); // Array from numeric values
-                        $smaller_than = trim($data[1]); // From second digit
-                    }
-
-                    if($greater_than != false)
-                    {
-                        $where .= " {$andOr} (
-                            t{$field_id}_{$this->_key}.value > '{$greater_than}' OR
-                            t{$field_id}_{$this->_key}.value_from > '{$greater_than}')";
-                    }
-                    if($smaller_than != false)
-                    {
-                        $where .= " {$andOr} (
-                            t{$field_id}_{$this->_key}.value < '{$smaller_than}' OR
-                            t{$field_id}_{$this->_key}.value_to < '{$smaller_than}')";
-                    }
-
-                } else {
-                    // Single parameter value, or single value in DS filter box
-                    $where .= "
-                        {$andOr} (
-                            (t{$field_id}_{$this->_key}.value = '{$filterValue}')
-                            OR
-                            (t{$field_id}_{$this->_key}.value_from <= '{$filterValue}'
-                            AND t{$field_id}_{$this->_key}.value_to >= '{$filterValue}')
-                        )
-                    ";
-                }
-            }
-
-			return true;
-		}
-
 		
-		// Publish panel (on publish page):
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-			// Add stylesheet to head:
-            $page = Administration::instance()->Page;
-			if ($page) {
-                $page->addStylesheetToHead(URL . '/extensions/slider/assets/smoothness/jquery-ui-1.8.6.custom.css', 'screen');
-                $page->addStylesheetToHead(URL . '/extensions/slider/assets/slider.css', 'screen');
-                $page->addScriptToHead(URL . '/extensions/slider/assets/jquery-ui-1.8.6.custom.min.js');
-                $page->addScriptToHead(URL . '/extensions/slider/assets/slider.js');
-			}
-			$value = General::sanitize($data['value']);
-			if(empty($value))
-			{
-				$value = $this->get('start_value');
-			}
-
-			$label = Widget::Label($this->get('label'));
-			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
-			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array('readonly'=>'readonly')));
-			$label->appendChild(new XMLElement('div', '', array('class'=>'slider')));
-			
-			// Add variables:
-			$label->appendChild(new XMLElement('var', $this->get('min_range'), array('class'=>'min_range')));
-			$label->appendChild(new XMLElement('var', $this->get('max_range'), array('class'=>'max_range')));
-			$label->appendChild(new XMLElement('var', $this->get('range'), array('class'=>'range')));
-			$label->appendChild(new XMLElement('var', $this->get('increment_value'), array('class'=>'increment_value')));
-			
-			// In case of an error:
-			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
-			else $wrapper->appendChild($label);
-		}
-		
-		
-		// Store the section
-		public function commit(){
+		/**
+		 *
+		 * Save field settings into the field's table
+		 */
+		 
+		 public function commit() {
+		 	
 			if(!parent::commit()) return false;
 			
 			$id = $this->get('id');
@@ -186,12 +46,261 @@
 		}
 		
 		
-		// Show the settings panel on the sections-page
-		public function displaySettingsPanel(&$wrapper, $errors = null)
-		{
-			parent::displaySettingsPanel($wrapper, $errors);
+		/**
+		 *
+		 * Process data before saving into database.
+		 *
+		 * @param array $data
+		 * @param int $status
+		 * @param $message
+		 * @param boolean $simulate
+		 * @param int $entry_id
+		 *
+		 * @return Array - data to be inserted into DB
+		 */
+		 
+		public function processRawFieldData($data, &$status, &$message=null, $simulate = false, $entry_id = null) {
+			
+			$status = self::__OK__;
+			
+			if (strlen(trim($data)) == 0) return array();
+			
+			$values = explode('-', $data);
+			
+			$result = array(
+				'value' => $data
+			);
+			
+			if(count($values) == 2) {
+				$result['value_from'] = $values[0];
+				$result['value_to'] = $values[1];
+			}
+			
+			return $result;
+		}
 
-            // $wrapper->appendChild($this->buildPublishLabel());
+
+		/* ******* DATA SOURCE ******* */
+		
+
+		/**
+		 * Build SQL for fetching the data from the DB
+		 *
+		 * @param $data
+		 * @param $joins
+		 * @param $where
+		 * @param $andOperation
+		 */
+		
+		public function buildDSRetrievalSQL($data, &$joins, &$where, $andOperation = false) {
+
+			$field_id = $this->get('id');
+			
+			if (!is_array($data)) $data = array($data);
+
+			$i = 0;
+
+			foreach($data as $filterValue) {
+
+				$this->_key++;
+
+				$joins .= "LEFT JOIN `tbl_entries_data_{$field_id}` AS t{$field_id}_{$this->_key} ON (e.id = t{$field_id}_{$this->_key}.entry_id)";
+
+				$andOr = $andOperation ? ' AND ' : ' OR ';
+				if($i == 0) { $andOr = 'AND'; }
+				$i++;
+				
+				// FILTER VARIABLES
+				$filterValue = $this->cleanValue($filterValue);
+				$filterRange = $this->get('range');
+				$filterMode;
+				$value;
+				$value_to;
+				$value_from;
+				
+				// CHECK FILTER MODE : BETWEEN
+				if(preg_match('/^(\d*)(\sto\s|-)(\d*)/', $filterValue)) {
+					
+					// Will test whether the 'to' range operator or n-n format has been used in the datasource filter or parameter
+					if(preg_match('/^(\d*)\sto\s(\d*)/', $filterValue)) {
+						$data = explode('to', $filterValue);
+					} elseif(preg_match('/^(\d*)-(\d*)/', $filterValue)) {
+						$data = explode('-', $filterValue);
+					}
+					
+					$filterMode = 'between';
+					$value_from = trim($data[0]); // Start value of filtering range
+					$value_to = trim($data[1]); // End value of filtering range
+					$value = $value_from.'-'.$value_to; // Range value to match database
+					
+				// CHECK FILTER MODE : GREATER THAN, LESS THAN, SMALLER THAN
+				} elseif(preg_match('/^(greater\sthan|less\sthan|smaller\sthan)(\d*)/', $filterValue)) {
+					
+					if(preg_match('/^greater\sthan\s(\d*)/', $filterValue)){
+						$data = explode('greater than', $filterValue);
+						$filterMode = 'greater than';
+					} elseif(preg_match('/^less\sthan\s(\d*)/', $filterValue)){
+						$data = explode('less than', $filterValue);
+						$filterMode = 'less than';
+					} elseif(preg_match('/^smaller\sthan\s(\d*)/', $filterValue)){
+						$data = explode('smaller than', $filterValue);
+						$filterMode = 'less than';
+					}
+					
+					$value = trim($data[1]);
+					
+				// CHECK FILTER MODE : GREATER THAN, LESS THAN, SMALLER THAN
+				} elseif(preg_match('/^([<>])(\d*)/', $filterValue)) {
+					
+					if(preg_match('/^>\s(\d*)/', $filterValue)){
+						$data = explode('>', $filterValue);
+						$filterMode = 'greater than';
+					} elseif(preg_match('/^<\s(\d*)/', $filterValue)){
+						$data = explode('<', $filterValue);
+						$filterMode = 'less than';
+					}
+					
+					$value = trim($data[1]);
+					
+				// CHECK FILTER MODE : IS
+				} else {
+					
+					$filterMode = 'is';
+					$value = trim($filterValue);
+					
+				}
+				
+				
+				// BUILD SQL : FILTER MODE "IS"
+				if($filterMode == 'is') {
+					if(!$filterRange) {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value + 0 ) = '{$value}'
+						)";
+					} else {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value_from + 0 ) <= '{$value}'
+							AND
+							( t{$field_id}_{$this->_key}.value_to + 0 ) >= '{$value}'
+						)";
+					}
+				
+				// BUILD SQL : FILTER MODE "LESS THAN"
+				} elseif($filterMode == 'less than') {
+					if(!$filterRange) {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value + 0 ) < '{$value}'
+						)";
+					} else {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value_to + 0 ) < '{$value}'
+						)";
+					}
+					
+				// BUILD SQL : FILTER MODE "GREATER THAN"
+				} elseif($filterMode == 'greater than') {
+					if(!$filterRange) {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value + 0 ) > '{$value}'
+						)";
+					} else {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value_from + 0 ) > '{$value}'
+						)";
+					}
+				
+				// BUILD SQL : FILTER MODE "BETWEEN"
+				} elseif($filterMode == 'between') {
+					if(!$filterRange) {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value + 0 ) >= '{$value_from}'
+							AND
+							( t{$field_id}_{$this->_key}.value + 0 ) <= '{$value_to}'
+						)";
+					} else {
+						$where .= " {$andOr} (
+							( t{$field_id}_{$this->_key}.value_from + 0 ) <= '{$value_from}'
+							AND
+							( t{$field_id}_{$this->_key}.value_to + 0 ) >= '{$value_to}'
+						)";
+					}
+				}
+			}
+			
+			return true;
+		}
+		
+				
+		/**
+		 * Appends data into the XML tree of a Data Source
+		 *
+		 * @param $wrapper
+		 * @param $data
+		 */
+		 
+		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
+			$value = $data['value'];
+			if($this->get('range') == 1) {
+				$element = new XMLElement($this->get('element_name'), null, array('range'=>'yes', 'from'=>$data['value_from'], 'to'=>$data['value_to']));
+			} else {
+				$element = new XMLElement($this->get('element_name'), $data['value'], array('range'=>'no'));
+			}
+			$wrapper->appendChild($element);
+		}
+		
+		
+			
+		/* ********* UI *********** */
+
+
+		/**
+		 *
+		 * Builds the UI for the publish page
+		 *
+		 * @param XMLElement $wrapper
+		 * @param mixed $data
+		 * @param mixed $flagWithError
+		 * @param string $fieldnamePrefix
+		 * @param string $fieldnamePostfix
+		 */
+		 
+		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+
+			$value = General::sanitize($data['value']);
+			if(empty($value))
+			{
+				$value = $this->get('start_value');
+			}
+			
+			$label = Widget::Label($this->get('label'));
+			$label->appendChild(new XMLElement('i', 'Value', array('class'=>'slider-field-label-value')));
+			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array(
+				'readonly'=>'readonly',
+				'data-min-range'=>$this->get('min_range'),
+				'data-max-range'=>$this->get('max_range'),
+				'data-range'=>$this->get('range'),
+				'data-increment-value'=>$this->get('increment_value')
+			)));
+			$label->appendChild(new XMLElement('div', '', array('id'=>'noUi-slider-'.$this->get('id'))));
+			
+			// In case of an error:
+			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
+			else $wrapper->appendChild($label);
+		}
+		
+		
+		
+		/**
+		 *
+		 * Builds the UI for the field's settings when creating/editing a section
+		 *
+		 * @param XMLElement $wrapper
+		 * @param array $errors
+		 */
+		 
+		public function displaySettingsPanel(&$wrapper, $errors = null) {
+			
+			parent::displaySettingsPanel($wrapper, $errors);
 
 			$div = new XMLElement('div', NULL, array('class' => 'group'));
 			$label = Widget::Label(__('Minimum value'));
@@ -226,22 +335,14 @@
 			$wrapper->appendChild($label);
 			$this->appendShowColumnCheckbox($wrapper);
 		}
+
 		
 		
-		// For the XML output:
-		public function appendFormattedElement(&$wrapper, $data, $encode=false){
-			$value = $data['value'];
-			if($this->get('range') == 1)
-			{
-				$element = new XMLElement($this->get('element_name'), null, array('range'=>'yes', 'from'=>$data['value_from'], 'to'=>$data['value_to']));
-			} else {
-				$element = new XMLElement($this->get('element_name'), $data['value'], array('range'=>'no'));
-			}
-			$wrapper->appendChild($element);
-		}
-		
-		
-		// Create table function:
+		/**
+		 *
+		 * Create Table
+		 *
+		 */
 		public function createTable(){
 			return Symphony::Database()->query(
 				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
@@ -257,5 +358,5 @@
 			);
 		}
 		
+		
 	}
-
