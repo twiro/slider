@@ -29,7 +29,7 @@
 			setSliderFieldValues(input, label, range, values);
 			
 			// Fetch Slider element
-			var div = $("div[id^='noUi-slider-'", this);
+			var div = $("div[id^='noUi-slider-']", this);
 			slider[i] = div[0];
 			
 			// Create Slider instance
