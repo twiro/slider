@@ -134,30 +134,23 @@
 		
 		// Publish panel (on publish page):
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-			// Add stylesheet to head:
-            $page = Administration::instance()->Page;
-			if ($page) {
-                $page->addStylesheetToHead(URL . '/extensions/slider/assets/smoothness/jquery-ui-1.8.6.custom.css', 'screen');
-                $page->addStylesheetToHead(URL . '/extensions/slider/assets/slider.css', 'screen');
-                $page->addScriptToHead(URL . '/extensions/slider/assets/jquery-ui-1.8.6.custom.min.js');
-                $page->addScriptToHead(URL . '/extensions/slider/assets/slider.js');
-			}
+
 			$value = General::sanitize($data['value']);
 			if(empty($value))
 			{
 				$value = $this->get('start_value');
 			}
-
-			$label = Widget::Label($this->get('label'));
-			if($this->get('required') != 'yes') $label->appendChild(new XMLElement('i', __('Optional')));
-			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array('readonly'=>'readonly')));
-			$label->appendChild(new XMLElement('div', '', array('class'=>'slider')));
 			
-			// Add variables:
-			$label->appendChild(new XMLElement('var', $this->get('min_range'), array('class'=>'min_range')));
-			$label->appendChild(new XMLElement('var', $this->get('max_range'), array('class'=>'max_range')));
-			$label->appendChild(new XMLElement('var', $this->get('range'), array('class'=>'range')));
-			$label->appendChild(new XMLElement('var', $this->get('increment_value'), array('class'=>'increment_value')));
+			$label = Widget::Label($this->get('label'));
+			$label->appendChild(new XMLElement('i', 'Value', array('class'=>'slider-field-label-value')));
+			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array(
+				'readonly'=>'readonly',
+				'data-min-range'=>$this->get('min_range'),
+				'data-max-range'=>$this->get('max_range'),
+				'data-range'=>$this->get('range'),
+				'data-increment-value'=>$this->get('increment_value')
+			)));
+			$label->appendChild(new XMLElement('div', '', array('id'=>'noUi-slider-'.$this->get('id'))));
 			
 			// In case of an error:
 			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
