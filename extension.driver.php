@@ -1,8 +1,8 @@
 <?php
 	
 	Class extension_Slider extends Extension {
-
-
+	
+	
 		/**
 		 * Subscribe to Delegates
 		 */
@@ -23,15 +23,15 @@
 		public function appendAssets(Array $context) {
 			
 			$callback = Administration::instance()->getPageCallback();
-
+			
 			if(in_array($callback['context']['page'], array('new', 'edit'))) {
-            Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/slider/assets/nouislider.css');
-            Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/slider/assets/slider.css');
-            Administration::instance()->Page->addScriptToHead(URL . '/extensions/slider/assets/nouislider.min.js');
-            Administration::instance()->Page->addScriptToHead(URL . '/extensions/slider/assets/slider.js');
+				Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/slider/assets/nouislider.css');
+				Administration::instance()->Page->addStylesheetToHead(URL . '/extensions/slider/assets/slider.css');
+				Administration::instance()->Page->addScriptToHead(URL . '/extensions/slider/assets/nouislider.min.js');
+				Administration::instance()->Page->addScriptToHead(URL . '/extensions/slider/assets/slider.js');
 			}
 		}
-	
+		
 				
 		/**
 		 * Installation
@@ -50,8 +50,8 @@
 			)");
 			return true;
 		}
-	
-	
+		
+		
 		/**
 		 * Uninstall
 		 */
