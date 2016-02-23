@@ -1,4 +1,5 @@
 
+
 /* SYMPHONY : FIELD SETTINGS
 ----------------------------------------------------------- */
 
@@ -6,8 +7,6 @@
 div.field-slider input {
 	display: none;
 }
-
-
 
 
 
@@ -49,10 +48,9 @@ div.field-slider input {
 }
 
 .noUi-connect {
-	background-color: #81e0d4;
+	background-color: #BFDC96;
 	box-shadow: inset 0 0 3px rgba(51,51,51,0.25);
 }
-
 
 
 /* Handles and cursors;
@@ -72,6 +70,7 @@ div.field-slider input {
 
 /* Handle stripes;
  */
+ 
 .noUi-handle:before,
 .noUi-handle:after {
 	height: 12px;
@@ -87,5 +86,4 @@ div.field-slider input {
 	background-color: #D0D0D0;
 	transition: background-color 50ms ease;
 }
-
 
