@@ -18,6 +18,13 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.1" date="2016-03-02" min="2.3.0" max="2.4.x">
+			- General Code cleanup
+			- Added validation and error messages for the field's configuration settings
+			- Added (dynamic) default values for configuration parameters "Start value" and "Increment value"
+			- Updated Settings Layout
+			- Removed tables from readme, outsourced the chapter "Filtering syntax" to github wiki
+		</release>
 		<release version="1.0" date="2016-02-23" min="2.3.0" max="2.4.x">
 			- Moved from jQuery UI to noUislider
 			- Refactored, fixed and extended filtering functions
