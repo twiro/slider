@@ -1,22 +1,180 @@
 <?php
 
+	if(!defined('__IN_SYMPHONY__')) die('<h2>Symphony Error</h2><p>You cannot directly access this file</p>');
+
 	Class fieldSlider extends Field {
-      
+		
+		
 		/**
 		 *
 		 * Constructor for the Field object
 		 */
 		 
 		public function __construct() {
-			// call the parent constructor
 			parent::__construct();
-			// set the name of the field
 			$this->_name = __('Slider');
+			$this->set('location', 'sidebar');
+		}
+		
+		
+		
+	/*-------------------------------------------------------------------------------------------------
+		SETUP
+	-------------------------------------------------------------------------------------------------*/
+		
+
+		public function createTable() {
+			try {
+				Symphony::Database()->query(sprintf("
+						CREATE TABLE IF NOT EXISTS `tbl_entries_data_%d` (
+						  `id` int(11) unsigned NOT NULL auto_increment,
+						  `entry_id` int(11) unsigned NOT NULL,
+						  `value` varchar(255) default NULL,
+						  `value_from` varchar(255) default NULL,
+						  `value_to` varchar(255) default NULL,
+						  PRIMARY KEY  (`id`),
+						  KEY `entry_id` (`entry_id`),
+						  KEY `value` (`value`)
+						) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+					", $this->get('id')
+				));
+				return true;
+			}
+			catch (Exception $ex) {
+				return false;
+			}
 		}
 		
 		
 		public function canFilter(){
 			return true;
+		}
+		
+		
+		
+	/*-------------------------------------------------------------------------------------------------
+		SETTINGS
+	-------------------------------------------------------------------------------------------------*/
+	
+	
+		/**
+		 * Displays settings panel in section editor.
+		 *
+		 * @param XMLElement $wrapper - parent element wrapping the field
+		 * @param array $errors - array with field errors, $errors['name-of-field-element']
+		 */
+		 
+		public function displaySettingsPanel(&$wrapper, $errors = null) {
+			
+			parent::displaySettingsPanel($wrapper, $errors);
+			
+			/* Fieldset & Group */
+			$fieldset = new XMLElement('fieldset');
+			$group = new XMLElement('div', NULL, array('class' => 'two columns'));
+
+			/* Minimum Value */
+			$min_label = Widget::Label(__('Minimum value'));
+			$min_label->setAttribute('class', 'column');
+			$min_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][min_value]', $this->get('min_range')));
+			if (isset($errors['min_value'])) {
+				$group->appendChild(Widget::Error($min_label, $errors['min_value']));
+			} else {
+				$group->appendChild($min_label);
+			}
+			
+			/* Maximum Value */
+			$max_label = Widget::Label(__('Maximum value'));
+			$max_label->setAttribute('class', 'column');
+			$max_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][max_value]', $this->get('max_range')));
+			if (isset($errors['max_value'])) {
+				$group->appendChild(Widget::Error($max_label, $errors['max_value']));
+			} else {
+				$group->appendChild($max_label);
+			}
+
+			/* Start Value */
+			$start_label = Widget::Label(__('Start Value'));
+			$start_label->setAttribute('class', 'column');
+			$start_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][start_value]', $this->get('start_value')));
+			if (isset($errors['start_value'])) {
+				$group->appendChild(Widget::Error($start_label, $errors['start_value']));
+			} else {
+				$group->appendChild($start_label);
+			}
+			
+			/* Incremental Value */
+			$inc_label = Widget::Label(__('Incremental value'));
+			$inc_label->setAttribute('class', 'column');
+			$inc_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][increment_value]', $this->get('increment_value')));
+			if (isset($errors['increment_value'])) {
+				$group->appendChild(Widget::Error($inc_label, $errors['increment_value']));
+			} else {
+				$group->appendChild($inc_label);
+			}
+			
+			/* Enable Range Mode */
+			$range_label = Widget::Label();
+			$range_label->setAttribute('class', 'column');
+			$attributes = array('type'=>'checkbox', 'name'=>'fields['.$this->get('sortorder').'][range]', 'value'=>'yes');			
+			if($this->get('range') == 1) {$attributes['checked'] = 'checked';}
+			$range_checkbox = new XMLElement('input', ' '.__('Enable range mode <i>(Adds a second handle for selecting a value range)</i>'), $attributes);
+			$range_label->appendChild($range_checkbox);
+			$group->appendChild($range_label);
+			
+			$fieldset->appendChild($group);
+			$wrapper->appendChild($fieldset);
+			
+			/* Fieldset (Default Settings) */
+			
+			$fieldset = new XMLElement('fieldset');
+			$this->appendShowColumnCheckbox($fieldset);
+			$wrapper->appendChild($fieldset);
+			
+		}
+	
+	
+		/**
+		 *
+		 * Validate the fields settings and return errors if wrong or missing input is detected
+		 *
+		 * @param array $errors
+		 * @param boolean $checkForDuplicates
+		 */	
+		
+		public function checkFields(&$errors, $checkForDuplicates=true) {
+		
+			if(!is_array($errors)) $errors = array();
+			
+			$check['min_value'] = $this->get('min_value');
+			$check['max_value'] = $this->get('max_value');
+			$check['start_value'] = $this->get('start_value');
+			$check['increment_value'] = $this->get('increment_value');
+			
+			// Validate Minimum Value
+			if($check['min_value'] == '') {
+				$errors['min_value'] = __('Minimum Value must not be empty. Please fill in a natural number.');
+			} else if (!preg_match('/^[0-9]+$/', $check['min_value'])) {
+				$errors['min_value'] = __('Minimum Value must be a natural number.');
+			}
+			
+			// Validate Maximum Value
+			if($check['max_value'] == '') {
+				$errors['max_value'] = __('Maximum Value must not be empty. Please fill in a natural number.');
+			} else if (!preg_match('/^[0-9]+$/', $check['max_value'])) {
+				$errors['max_value'] = __('Maximum Value must be a natural number.');
+			}
+			
+			// Validate Start Value
+			if($check['start_value'] != '' && !preg_match('/^[0-9]+$/', $check['start_value'])) {
+				$errors['start_value'] = __('Start Value must be a natural number.');
+			}
+			
+			// Validate Increment Value
+			if($check['increment_value'] != '' && !preg_match('/^[0-9]+$/', $check['increment_value'])) {
+				$errors['increment_value'] = __('Incremental Value must be a natural number.');
+			}
+			
+			return Field::checkFields($errors, $checkForDuplicates);
 		}
 		
 		
@@ -37,12 +195,54 @@
 			$fields['range'] = $this->get('range') == false ? 0 : 1;
 			$fields['min_range'] = $this->get('min_value');
 			$fields['max_range'] = $this->get('max_value');
-			$fields['start_value'] = $this->get('start_value');
-			$fields['increment_value'] = $this->get('increment_value');
+			$fields['start_value'] = $this->get('start_value') == '' ? $this->get('min_value') : $this->get('start_value');
+			$fields['increment_value'] = $this->get('increment_value') == '' ? '0' : $this->get('increment_value');
 			
 			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");
 			
 			return Symphony::Database()->insert($fields, 'tbl_fields_' . $this->handle());			
+		}
+		
+		
+		
+	/*-------------------------------------------------------------------------------------------------
+		INPUT
+	-------------------------------------------------------------------------------------------------*/
+		
+		
+		/**
+		 *
+		 * Build the UI for the publish page
+		 *
+		 * @param XMLElement $wrapper
+		 * @param mixed $data
+		 * @param mixed $flagWithError
+		 * @param string $fieldnamePrefix
+		 * @param string $fieldnamePostfix
+		 */
+		
+		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+
+			$value = General::sanitize($data['value']);
+			if(empty($value))
+			{
+				$value = $this->get('start_value');
+			}
+			
+			$label = Widget::Label($this->get('label'));
+			$label->appendChild(new XMLElement('i', 'Value', array('class'=>'slider-field-label-value')));
+			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array(
+				'readonly'=>'readonly',
+				'data-min-range'=>$this->get('min_range'),
+				'data-max-range'=>$this->get('max_range'),
+				'data-range'=>$this->get('range'),
+				'data-increment-value'=>$this->get('increment_value')
+			)));
+			$label->appendChild(new XMLElement('div', '', array('id'=>'noUi-slider-'.$this->get('id'))));
+			
+			// In case of an error:
+			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
+			else $wrapper->appendChild($label);
 		}
 		
 		
@@ -56,7 +256,7 @@
 		 * @param boolean $simulate
 		 * @param int $entry_id
 		 *
-		 * @return Array - data to be inserted into DB
+		 * @return array - data to be inserted into DB
 		 */
 		 
 		public function processRawFieldData($data, &$status, &$message=null, $simulate = false, $entry_id = null) {
@@ -78,11 +278,38 @@
 			
 			return $result;
 		}
-
-
-		/* ******* DATA SOURCE ******* */
 		
-
+		
+	/*-------------------------------------------------------------------------------------------------
+		OUTPUT
+	-------------------------------------------------------------------------------------------------*/
+		
+		
+		/**
+		 * Append the field's data into the XML tree of a Data Source
+		 *
+		 * @param $wrapper
+		 * @param $data
+		 * @param $encode
+		 */
+		
+		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
+			$value = $data['value'];
+			if($this->get('range') == 1) {
+				$element = new XMLElement($this->get('element_name'), null, array('range'=>'yes', 'from'=>$data['value_from'], 'to'=>$data['value_to']));
+			} else {
+				$element = new XMLElement($this->get('element_name'), $data['value'], array('range'=>'no'));
+			}
+			$wrapper->appendChild($element);
+		}
+		
+		
+		
+	/*-------------------------------------------------------------------------------------------------
+		FILTERING
+	-------------------------------------------------------------------------------------------------*/
+		
+		
 		/**
 		 * Build SQL for fetching the data from the DB
 		 *
@@ -229,134 +456,4 @@
 			
 			return true;
 		}
-		
-				
-		/**
-		 * Appends data into the XML tree of a Data Source
-		 *
-		 * @param $wrapper
-		 * @param $data
-		 */
-		 
-		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
-			$value = $data['value'];
-			if($this->get('range') == 1) {
-				$element = new XMLElement($this->get('element_name'), null, array('range'=>'yes', 'from'=>$data['value_from'], 'to'=>$data['value_to']));
-			} else {
-				$element = new XMLElement($this->get('element_name'), $data['value'], array('range'=>'no'));
-			}
-			$wrapper->appendChild($element);
-		}
-		
-		
-			
-		/* ********* UI *********** */
-
-
-		/**
-		 *
-		 * Builds the UI for the publish page
-		 *
-		 * @param XMLElement $wrapper
-		 * @param mixed $data
-		 * @param mixed $flagWithError
-		 * @param string $fieldnamePrefix
-		 * @param string $fieldnamePostfix
-		 */
-		 
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
-
-			$value = General::sanitize($data['value']);
-			if(empty($value))
-			{
-				$value = $this->get('start_value');
-			}
-			
-			$label = Widget::Label($this->get('label'));
-			$label->appendChild(new XMLElement('i', 'Value', array('class'=>'slider-field-label-value')));
-			$label->appendChild(Widget::Input('fields'.$fieldnamePrefix.'['.$this->get('element_name').']'.$fieldnamePostfix, (strlen($value) != 0 ? $value : NULL), 'text', array(
-				'readonly'=>'readonly',
-				'data-min-range'=>$this->get('min_range'),
-				'data-max-range'=>$this->get('max_range'),
-				'data-range'=>$this->get('range'),
-				'data-increment-value'=>$this->get('increment_value')
-			)));
-			$label->appendChild(new XMLElement('div', '', array('id'=>'noUi-slider-'.$this->get('id'))));
-			
-			// In case of an error:
-			if($flagWithError != NULL) $wrapper->appendChild(Widget::wrapFormElementWithError($label, $flagWithError));
-			else $wrapper->appendChild($label);
-		}
-		
-		
-		
-		/**
-		 *
-		 * Builds the UI for the field's settings when creating/editing a section
-		 *
-		 * @param XMLElement $wrapper
-		 * @param array $errors
-		 */
-		 
-		public function displaySettingsPanel(&$wrapper, $errors = null) {
-			
-			parent::displaySettingsPanel($wrapper, $errors);
-
-			$div = new XMLElement('div', NULL, array('class' => 'group'));
-			$label = Widget::Label(__('Minimum value'));
-			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][min_value]', $this->get('min_range')));
-			$div->appendChild($label);
-			
-			$label = Widget::Label(__('Maximum value'));
-			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][max_value]', $this->get('max_range')));
-			$div->appendChild($label);
-			
-			$wrapper->appendChild($div);
-			
-			$div = new XMLElement('div', NULL, array('class' => 'group'));
-			$label = Widget::Label(__('Start Value'));
-			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][start_value]', $this->get('start_value')));
-			$div->appendChild($label);
-			
-			$label = Widget::Label(__('Incremental value'));
-			$label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][increment_value]', $this->get('increment_value')));
-			$div->appendChild($label);
-			
-			$wrapper->appendChild($div);
-			
-			$label = Widget::Label();
-			$attributes = array('type'=>'checkbox', 'name'=>'fields['.$this->get('sortorder').'][range]', 'value'=>'yes');			
-			if($this->get('range') == 1)
-			{
-				$attributes['checked'] = 'checked';
-			}
-			$checkbox = new XMLElement('input', ' Define a range', $attributes);
-			$label->appendChild($checkbox);
-			$wrapper->appendChild($label);
-			$this->appendShowColumnCheckbox($wrapper);
-		}
-
-		
-		
-		/**
-		 *
-		 * Create Table
-		 *
-		 */
-		public function createTable(){
-			return Symphony::Database()->query(
-				"CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-				  `id` int(11) unsigned NOT NULL auto_increment,
-				  `entry_id` int(11) unsigned NOT NULL,
-				  `value` varchar(255) default NULL,
-				  `value_from` varchar(255) default NULL,
-				  `value_to` varchar(255) default NULL,
-				  PRIMARY KEY  (`id`),
-				  KEY `entry_id` (`entry_id`),
-				  KEY `value` (`value`)
-				) ENGINE=MyISAM;"
-			);
-		}
-		
-		
 	}
