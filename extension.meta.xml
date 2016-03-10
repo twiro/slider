@@ -18,6 +18,9 @@
 		</author>
 	</authors>
 	<releases>
+		<release version="1.2" date="2016-03-10" min="2.3.0" max="2.5.x">
+			- Added prepareTableValue (2.5 compatibility)
+		</release>
 		<release version="1.1" date="2016-03-02" min="2.3.0" max="2.4.x">
 			- General Code cleanup
 			- Added validation and error messages for the field's configuration settings

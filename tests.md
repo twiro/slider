@@ -23,7 +23,7 @@
 
 ## Tests – Single Values
 
-###### Performed with Slider Field 1.1 and Symphony CMS 2.3.1 and 2.4.0 
+###### Performed with Slider Field 1.2 and Symphony CMS 2.3.1, 2.4.0 and 2.5.2
 
 | Nr. | Filter Mode | Filter Value | Expected Result | DF | PF |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -63,7 +63,7 @@
 
 ## Tests – Value Range
 
-###### Performed with Slider Field 1.1 and Symphony CMS 2.3.1 and 2.4.0
+###### Performed with Slider Field 1.2 and Symphony CMS 2.3.1, 2.4.0 and 2.5.2
 
 | Nr. | Filter Mode | Filter Value | Expected Result | DF | PF |
 | :--- | :--- | :--- | :--- | :--- | :--- |
