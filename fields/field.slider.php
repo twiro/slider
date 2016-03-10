@@ -286,6 +286,28 @@
 		
 		
 		/**
+		 *
+		 * Format the field's value for display in the publish index tables.
+		 *
+		 * @param Array $data
+		 * @param XMLElement $link (optional)
+		 * @param integer $entry_id (optional)
+		 *
+		 * @return string
+		 */
+		
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null){
+			
+			if (empty($data)) return;
+			
+			// Prepare Text Value
+			$value = strip_tags($data['value']);
+			
+			return $value;
+		}
+		
+			
+		/**
 		 * Append the field's data into the XML tree of a Data Source
 		 *
 		 * @param $wrapper
