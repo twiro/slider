@@ -10,9 +10,9 @@
 			var label   = $(".slider-field-label-value", this);
 			var range   = input.data('range') == 1;
 			var connect = (range) ? true : false;
-			var min     = parseInt(input.data('min-range'));
-			var max     = parseInt(input.data('max-range'));
-			var step    = parseInt(input.data('increment-value'));
+			var min     = parseInt(input.data('minRange'));
+			var max     = parseInt(input.data('maxRange'));
+			var step    = parseInt(input.data('incrementValue'));
 			var value   = input.val();
 			var values  = input.val().split('-');
 			
