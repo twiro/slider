@@ -45,11 +45,45 @@
 			}
 		}
 		
-		
-		public function canFilter(){
+		public function canFilter() {
 			return true;
 		}
 		
+		public function allowDatasourceParamOutput() {
+			return true;
+		}
+		
+		public function fetchFilterableOperators() {
+			return array(
+				array(
+					'title' 			=> 'is',
+					'filter' 			=> ' ',
+					'help' 				=> __('Find values that are an exact match for the given number(s).')
+				),
+				array(
+					'title'				=> 'less than',
+					'filter'			=> 'less than ',
+					'help'				=> __('Less than %s', array('<code>$x</code>'))
+				),
+				array(
+					'title'				=> 'greater than',
+					'filter'			=> 'greater than ',
+					'help'				=> __('Greater than %s', array('<code>$x</code>'))
+				),
+				array(
+					'title'				=> 'between',
+					'filter'			=> '',
+					'help'				=> __('Find values between two values with %s to %s', array(
+						'<code>$x</code>',
+						'<code>$y</code>'
+					))
+				),
+			);
+		}
+		
+		public function fetchSuggestionTypes() {
+			return array('static');
+		}
 		
 		
 	/*-------------------------------------------------------------------------------------------------
