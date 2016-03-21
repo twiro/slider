@@ -45,11 +45,45 @@
 			}
 		}
 		
-		
-		public function canFilter(){
+		public function canFilter() {
 			return true;
 		}
 		
+		public function allowDatasourceParamOutput() {
+			return true;
+		}
+		
+		public function fetchFilterableOperators() {
+			return array(
+				array(
+					'title' 			=> 'is',
+					'filter' 			=> ' ',
+					'help' 				=> __('Find values that are an exact match for the given number(s).')
+				),
+				array(
+					'title'				=> 'less than',
+					'filter'			=> 'less than ',
+					'help'				=> __('Less than %s', array('<code>$x</code>'))
+				),
+				array(
+					'title'				=> 'greater than',
+					'filter'			=> 'greater than ',
+					'help'				=> __('Greater than %s', array('<code>$x</code>'))
+				),
+				array(
+					'title'				=> 'between',
+					'filter'			=> '',
+					'help'				=> __('Find values between two values with %s to %s', array(
+						'<code>$x</code>',
+						'<code>$y</code>'
+					))
+				),
+			);
+		}
+		
+		public function fetchSuggestionTypes() {
+			return array('static');
+		}
 		
 		
 	/*-------------------------------------------------------------------------------------------------
@@ -68,6 +102,9 @@
 			
 			parent::displaySettingsPanel($wrapper, $errors);
 			
+			/* Field Sort Order */
+			$sortorder = $this->get('sortorder');
+			
 			/* Fieldset & Group */
 			$fieldset = new XMLElement('fieldset');
 			$group = new XMLElement('div', NULL, array('class' => 'two columns'));
@@ -75,9 +112,9 @@
 			/* Minimum Value */
 			$min_label = Widget::Label(__('Minimum value'));
 			$min_label->setAttribute('class', 'column');
-			$min_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][min_value]', $this->get('min_range')));
-			if (isset($errors['min_value'])) {
-				$group->appendChild(Widget::Error($min_label, $errors['min_value']));
+			$min_label->appendChild(Widget::Input('fields['.$sortorder.'][min_range]', $this->get('min_range')));
+			if (isset($errors['min_range'])) {
+				$group->appendChild(Widget::Error($min_label, $errors['min_range']));
 			} else {
 				$group->appendChild($min_label);
 			}
@@ -85,9 +122,9 @@
 			/* Maximum Value */
 			$max_label = Widget::Label(__('Maximum value'));
 			$max_label->setAttribute('class', 'column');
-			$max_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][max_value]', $this->get('max_range')));
-			if (isset($errors['max_value'])) {
-				$group->appendChild(Widget::Error($max_label, $errors['max_value']));
+			$max_label->appendChild(Widget::Input('fields['.$sortorder.'][max_range]', $this->get('max_range')));
+			if (isset($errors['max_range'])) {
+				$group->appendChild(Widget::Error($max_label, $errors['max_range']));
 			} else {
 				$group->appendChild($max_label);
 			}
@@ -95,7 +132,7 @@
 			/* Start Value */
 			$start_label = Widget::Label(__('Start Value'));
 			$start_label->setAttribute('class', 'column');
-			$start_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][start_value]', $this->get('start_value')));
+			$start_label->appendChild(Widget::Input('fields['.$sortorder.'][start_value]', $this->get('start_value')));
 			if (isset($errors['start_value'])) {
 				$group->appendChild(Widget::Error($start_label, $errors['start_value']));
 			} else {
@@ -105,7 +142,7 @@
 			/* Incremental Value */
 			$inc_label = Widget::Label(__('Incremental value'));
 			$inc_label->setAttribute('class', 'column');
-			$inc_label->appendChild(Widget::Input('fields['.$this->get('sortorder').'][increment_value]', $this->get('increment_value')));
+			$inc_label->appendChild(Widget::Input('fields['.$sortorder.'][increment_value]', $this->get('increment_value')));
 			if (isset($errors['increment_value'])) {
 				$group->appendChild(Widget::Error($inc_label, $errors['increment_value']));
 			} else {
@@ -115,7 +152,7 @@
 			/* Enable Range Mode */
 			$range_label = Widget::Label();
 			$range_label->setAttribute('class', 'column');
-			$attributes = array('type'=>'checkbox', 'name'=>'fields['.$this->get('sortorder').'][range]', 'value'=>'yes');			
+			$attributes = array('type'=>'checkbox', 'name'=>'fields['.$sortorder.'][range]', 'value'=>'yes');			
 			if($this->get('range') == 1) {$attributes['checked'] = 'checked';}
 			$range_checkbox = new XMLElement('input', ' '.__('Enable range mode <i>(Adds a second handle for selecting a value range)</i>'), $attributes);
 			$range_label->appendChild($range_checkbox);
@@ -125,7 +162,6 @@
 			$wrapper->appendChild($fieldset);
 			
 			/* Fieldset (Default Settings) */
-			
 			$fieldset = new XMLElement('fieldset');
 			$this->appendShowColumnCheckbox($fieldset);
 			$wrapper->appendChild($fieldset);
@@ -142,26 +178,26 @@
 		 */	
 		
 		public function checkFields(&$errors, $checkForDuplicates=true) {
-		
+			
 			if(!is_array($errors)) $errors = array();
 			
-			$check['min_value'] = $this->get('min_value');
-			$check['max_value'] = $this->get('max_value');
+			$check['min_range'] = $this->get('min_range');
+			$check['max_range'] = $this->get('max_range');
 			$check['start_value'] = $this->get('start_value');
 			$check['increment_value'] = $this->get('increment_value');
 			
 			// Validate Minimum Value
-			if($check['min_value'] == '') {
-				$errors['min_value'] = __('Minimum Value must not be empty. Please fill in a natural number.');
-			} else if (!preg_match('/^[0-9]+$/', $check['min_value'])) {
-				$errors['min_value'] = __('Minimum Value must be a natural number.');
+			if($check['min_range'] == '') {
+				$errors['min_range'] = __('Minimum Value must not be empty. Please fill in a natural number.');
+			} else if (!preg_match('/^[0-9]+$/', $check['min_range'])) {
+				$errors['min_range'] = __('Minimum Value must be a natural number.');
 			}
 			
 			// Validate Maximum Value
-			if($check['max_value'] == '') {
-				$errors['max_value'] = __('Maximum Value must not be empty. Please fill in a natural number.');
-			} else if (!preg_match('/^[0-9]+$/', $check['max_value'])) {
-				$errors['max_value'] = __('Maximum Value must be a natural number.');
+			if($check['max_range'] == '') {
+				$errors['max_range'] = __('Maximum Value must not be empty. Please fill in a natural number.');
+			} else if (!preg_match('/^[0-9]+$/', $check['max_range'])) {
+				$errors['max_range'] = __('Maximum Value must be a natural number.');
 			}
 			
 			// Validate Start Value
@@ -193,9 +229,9 @@
 			$fields = array();
 			$fields['field_id'] = $id;
 			$fields['range'] = $this->get('range') == false ? 0 : 1;
-			$fields['min_range'] = $this->get('min_value');
-			$fields['max_range'] = $this->get('max_value');
-			$fields['start_value'] = $this->get('start_value') == '' ? $this->get('min_value') : $this->get('start_value');
+			$fields['min_range'] = $this->get('min_range');
+			$fields['max_range'] = $this->get('max_range');
+			$fields['start_value'] = $this->get('start_value') == '' ? $this->get('min_range') : $this->get('start_value');
 			$fields['increment_value'] = $this->get('increment_value') == '' ? '0' : $this->get('increment_value');
 			
 			Symphony::Database()->query("DELETE FROM `tbl_fields_".$this->handle()."` WHERE `field_id` = '$id' LIMIT 1");

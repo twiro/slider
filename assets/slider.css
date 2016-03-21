@@ -3,10 +3,14 @@
 /* SYMPHONY : FIELD SETTINGS
 ----------------------------------------------------------- */
 
-
-div.field-slider input {
+.field-slider input {
 	display: none;
 }
+
+.field-slider i {
+	color: #222;
+}
+
 
 
 
