@@ -2,6 +2,8 @@
 
 A slider with a configurable value range (minimum – maximum, e.g. `0`–`100`) that can either be used with a single handle (select a single value, e.g. `50`) or with two handles (select a value range, e.g. `40`–`50`).
 
+![Symphony CMS Slider Field - Publish Area UI](https://cloud.githubusercontent.com/assets/870227/13916199/71cc4c68-ef59-11e5-9810-c217b6e64aa9.png)
+
 
 ## 1. Installation
 
@@ -62,3 +64,9 @@ Entries filtered by slider field will be returned as result …
 * ... if the entry's slider defines a **single value** that lies **within** a **range of filter values**.
 * ... if the entry's slider defines a **value range** and a **single filter value** is **within** that range.
 * ... if the entry's slider defines a **value range** that lies **within** a **range of filter values**.
+
+
+
+## 4. Acknowledgements ##
+
+This extension was originally developed by [Giel Berkers](https://github.com/kanduvisla) for [Twisted Interactive](https://github.com/TwistedInteractive).
