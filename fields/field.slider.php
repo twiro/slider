@@ -94,11 +94,13 @@
 		/**
 		 * Displays settings panel in section editor.
 		 *
+		 * https://www.getsymphony.com/learn/api/2.3.0/toolkit/field/#displaySettingsPanel
+		 *
 		 * @param XMLElement $wrapper - parent element wrapping the field
 		 * @param array $errors - array with field errors, $errors['name-of-field-element']
 		 */
 		 
-		public function displaySettingsPanel(&$wrapper, $errors = null) {
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = NULL) {
 			
 			parent::displaySettingsPanel($wrapper, $errors);
 			
@@ -173,11 +175,13 @@
 		 *
 		 * Validate the fields settings and return errors if wrong or missing input is detected
 		 *
+		 * https://www.getsymphony.com/learn/api/2.3/toolkit/field/#checkFields
+		 *
 		 * @param array $errors
 		 * @param boolean $checkForDuplicates
 		 */	
 		
-		public function checkFields(&$errors, $checkForDuplicates=true) {
+		public function checkFields(array &$errors, $checkForDuplicates = true) {
 			
 			if(!is_array($errors)) $errors = array();
 			
@@ -217,6 +221,8 @@
 		/**
 		 *
 		 * Save field settings into the field's table
+		 *
+		 * https://www.getsymphony.com/learn/api/2.3/toolkit/field/#commit
 		 */
 		 
 		 public function commit() {
@@ -250,6 +256,8 @@
 		 *
 		 * Build the UI for the publish page
 		 *
+		 * https://www.getsymphony.com/learn/api/2.3.0/toolkit/field/#displayPublishPanel
+		 *
 		 * @param XMLElement $wrapper
 		 * @param mixed $data
 		 * @param mixed $flagWithError
@@ -257,7 +265,7 @@
 		 * @param string $fieldnamePostfix
 		 */
 		
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL){
+		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
 
 			$value = General::sanitize($data['value']);
 			if(empty($value))
@@ -286,6 +294,8 @@
 		 *
 		 * Process data before saving into database.
 		 *
+		 * https://www.getsymphony.com/learn/api/2.3/toolkit/field/#processRawFieldData
+		 *
 		 * @param array $data
 		 * @param int $status
 		 * @param $message
@@ -295,7 +305,7 @@
 		 * @return array - data to be inserted into DB
 		 */
 		 
-		public function processRawFieldData($data, &$status, &$message=null, $simulate = false, $entry_id = null) {
+		public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null) {
 			
 			$status = self::__OK__;
 			
@@ -325,6 +335,8 @@
 		 *
 		 * Format the field's value for display in the publish index tables.
 		 *
+		 * https://www.getsymphony.com/learn/api/2.3/toolkit/field/#prepareTableValue
+		 *
 		 * @param Array $data
 		 * @param XMLElement $link (optional)
 		 * @param integer $entry_id (optional)
@@ -346,12 +358,14 @@
 		/**
 		 * Append the field's data into the XML tree of a Data Source
 		 *
+		 * https://www.getsymphony.com/learn/api/2.3/toolkit/field/#appendFormattedElement
+		 *
 		 * @param $wrapper
 		 * @param $data
 		 * @param $encode
 		 */
 		
-		public function appendFormattedElement(&$wrapper, $data, $encode=false) {
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = NULL, $entry_id = NULL) {
 			$value = $data['value'];
 			if($this->get('range') == 1) {
 				$element = new XMLElement($this->get('element_name'), null, array('range'=>'yes', 'from'=>$data['value_from'], 'to'=>$data['value_to']));
@@ -370,6 +384,8 @@
 		
 		/**
 		 * Build SQL for fetching the data from the DB
+		 *
+		 * https://www.getsymphony.com/learn/api/2.3/toolkit/field/#buildDSRetrievalSQL
 		 *
 		 * @param $data
 		 * @param $joins

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<extension id="slider" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+<extension id="slider" xmlns="https://getsymphony.com/schemas/extension/1.0">
 	<name>Slider Field</name>
 	<description>A slider with a configurable value range that can either be used with a single handle (select a single value) or with two handles (select a value range).</description>
 	<repo type="github">https://github.com/twiro/slider</repo>
 	<url type="discuss">http://getsymphony.com/discuss/thread/55453/</url>
+	<url type="discuss">https://github.com/twiro/slider/issues</url>
 	<types>
 		<type>Field</type>
 	</types>
@@ -14,22 +15,27 @@
 		</author>
 	</authors>
 	<releases>
-		<release version="1.3" date="2016-03-21" min="2.3.0" max="2.x.x">
+		<release version="1.3.1" date="2018-09-16" min="2.3.0" max="2.x.x">
+			- Compatibility with Symphony 2.7.x / PHP 7.x
+			- Added meta issues link
+			- Fixed meta schema link
+		</release>
+		<release version="1.3.0" date="2016-03-21" min="2.3.0" max="2.x.x">
 			- Added support for publish filtering (Symphony 2.6+)
 			- Improved Field Validation (fixes [#13](https://github.com/twiro/slider/issues/13]))
 			- Enabled datasource parameters
 		</release>
-		<release version="1.2" date="2016-03-10" min="2.3.0" max="2.5.x">
+		<release version="1.2.0" date="2016-03-10" min="2.3.0" max="2.5.x">
 			- Added prepareTableValue (2.5 compatibility)
 		</release>
-		<release version="1.1" date="2016-03-02" min="2.3.0" max="2.4.x">
+		<release version="1.1.0" date="2016-03-02" min="2.3.0" max="2.4.x">
 			- General Code cleanup
 			- Added validation and error messages for the field's configuration settings
 			- Added (dynamic) default values for configuration parameters "Start value" and "Increment value"
 			- Updated Settings Layout
 			- Removed tables from readme, outsourced the chapter "Filtering syntax" to github wiki
 		</release>
-		<release version="1.0" date="2016-02-23" min="2.3.0" max="2.4.x">
+		<release version="1.0-0" date="2016-02-23" min="2.3.0" max="2.4.x">
 			- Moved from jQuery UI to noUislider
 			- Refactored, fixed and extended filtering functions
 			- Minor updates to improve 2.3 compatibility
@@ -37,7 +43,7 @@
 			- Rewrote and extended the readme
 			- Added tests 
 		</release>
-		<release version="0.2" date="2011-12-16" min="2.3.0" />
+		<release version="0.2.0" date="2011-12-16" min="2.3.0" />
 	</releases>
     <media>
     	<item type="image" url="https://cloud.githubusercontent.com/assets/870227/13916199/71cc4c68-ef59-11e5-9810-c217b6e64aa9.png">Publish Area UI</item>
